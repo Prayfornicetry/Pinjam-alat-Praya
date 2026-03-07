@@ -97,12 +97,7 @@
     </a>
 </div>
 
-<div class="mt-4 text-center">
-    <small class="text-muted">
-        Demo Login:<br>
-        <strong>Admin:</strong> admin@elending.com / password
-    </small>
-</div>
+
 @endsection
 
 @push('scripts')
