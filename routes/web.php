@@ -87,6 +87,16 @@ Route::middleware('auth')->group(function () {
         // Users CRUD
         Route::resource('users', UserController::class);
         
+        // Add these routes inside admin middleware group
+
+// Discount Management (Admin Only)
+Route::middleware('role:admin')->group(function () {
+    Route::resource('discounts', DiscountController::class);
+    Route::post('/discounts/validate-code', [DiscountController::class, 'validateCode'])->name('discounts.validate-code');
+    
+    // Payment verification
+    Route::post('/borrowings/{id}/verify-payment', [BorrowingController::class, 'verifyPayment'])->name('borrowings.verify-payment');
+});
         // Settings
         Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');
         Route::post('settings', [SettingsController::class, 'update'])->name('settings.update');
