@@ -5,9 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Borrowing;
 use App\Models\Item;
 use App\Models\User;
+use App\Models\Discount;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Auth;      // ✅ WAJIB ADA!
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class BorrowingController extends Controller
@@ -56,7 +57,13 @@ class BorrowingController extends Controller
         
         $users = User::where('is_active', true)->get();
         
-        return view('borrowings.create', compact('items', 'users'));
+        // Get active discounts
+        $activeDiscounts = Discount::where('is_active', true)
+            ->where('start_date', '<=', Carbon::today())
+            ->where('end_date', '>=', Carbon::today())
+            ->get();
+        
+        return view('borrowings.create', compact('items', 'users', 'activeDiscounts'));
     }
 
     /**
@@ -70,6 +77,9 @@ class BorrowingController extends Controller
             'borrow_date' => 'required|date|after_or_equal:today',
             'return_date' => 'required|date|after:borrow_date',
             'notes' => 'nullable|string|max:500',
+            // ✅ TAMBAHAN: Payment & Discount fields
+            'payment_method' => 'required|in:transfer,qris,cash',
+            'discount_code' => 'nullable|string|max:50',
         ], [
             'user_id.required' => 'Peminjam harus dipilih',
             'item_id.required' => 'Alat harus dipilih',
@@ -77,6 +87,7 @@ class BorrowingController extends Controller
             'borrow_date.after_or_equal' => 'Tanggal pinjam tidak boleh di masa lalu',
             'return_date.required' => 'Tanggal kembali harus diisi',
             'return_date.after' => 'Tanggal kembali harus setelah tanggal pinjam',
+            'payment_method.required' => 'Metode pembayaran harus dipilih',
         ]);
 
         // Cek stok tersedia
@@ -84,6 +95,16 @@ class BorrowingController extends Controller
         if ($item->stock_available <= 0) {
             return back()->with('error', '❌ Stok alat tidak tersedia!')->withInput();
         }
+        
+        // ✅ HITUNG HARGA
+        $user = User::findOrFail($validated['user_id']);
+        $priceData = $this->calculatePrice(
+            $item, 
+            $validated['borrow_date'], 
+            $validated['return_date'], 
+            $validated['discount_code'] ?? null,
+            $user->role === 'user'
+        );
 
         // Buat peminjaman
         $borrowing = Borrowing::create([
@@ -93,10 +114,21 @@ class BorrowingController extends Controller
             'return_date' => $validated['return_date'],
             'status' => 'pending',
             'notes' => $validated['notes'] ?? null,
+            // ✅ PRICE FIELDS
+            'rental_price_per_day' => $priceData['price_per_day'],
+            'total_days' => $priceData['total_days'],
+            'subtotal' => $priceData['subtotal'],
+            'discount_code' => $validated['discount_code'] ?? null,
+            'discount_amount' => $priceData['discount_amount'],
+            'total_after_discount' => $priceData['total_after_discount'],
+            'deposit_paid' => $priceData['deposit'],
+            'grand_total' => $priceData['grand_total'],
+            'payment_method' => $validated['payment_method'],
+            'payment_status' => 'pending',
         ]);
 
         return redirect()->route('borrowings.index')
-            ->with('success', '✅ Peminjaman berhasil dibuat! Menunggu approval.');
+            ->with('success', '✅ Peminjaman berhasil dibuat! Total: Rp ' . number_format($priceData['grand_total'], 0, ',', '.'));
     }
 
     /**
@@ -104,7 +136,9 @@ class BorrowingController extends Controller
      */
     public function show($id)
     {
-        $borrowing = Borrowing::with(['user', 'item.category', 'approvedBy'])->findOrFail($id);
+        $borrowing = Borrowing::with(['user', 'item.category', 'approvedBy', 'payments'])
+            ->findOrFail($id);
+        
         return view('borrowings.show', compact('borrowing'));
     }
 
@@ -147,9 +181,9 @@ class BorrowingController extends Controller
             'return_date' => 'required|date|after:borrow_date',
             'notes' => 'nullable|string|max:500',
         ]);
-
+        
         $borrowing->update($validated);
-
+        
         return redirect()->route('borrowings.index')
             ->with('success', '✅ Peminjaman berhasil diupdate!');
     }
@@ -167,7 +201,7 @@ class BorrowingController extends Controller
         }
         
         $borrowing->delete();
-
+        
         return redirect()->route('borrowings.index')
             ->with('success', '✅ Peminjaman berhasil dihapus!');
     }
@@ -195,7 +229,7 @@ class BorrowingController extends Controller
         // Update status
         $borrowing->update([
             'status' => 'approved',
-            'approved_by' => Auth::id(),  // ✅ Pakai Auth::id()
+            'approved_by' => Auth::id(),
         ]);
 
         return back()->with('success', '✅ Peminjaman berhasil disetujui!');
@@ -219,7 +253,7 @@ class BorrowingController extends Controller
         $borrowing->update([
             'status' => 'rejected',
             'rejection_reason' => $validated['rejection_reason'],
-            'approved_by' => Auth::id(),  // ✅ Pakai Auth::id()
+            'approved_by' => Auth::id(),
         ]);
 
         return back()->with('success', '❌ Peminjaman ditolak!');
@@ -239,13 +273,28 @@ class BorrowingController extends Controller
         // Kembalikan stok
         $borrowing->item->increment('stock_available');
         
+        // ✅ HITUNG DENDA KETERLAMBATAN
+        $lateFee = $this->calculateLateFee(
+            $borrowing->item, 
+            $borrowing->return_date, 
+            Carbon::today()
+        );
+        
         // Update status
         $borrowing->update([
             'status' => 'returned',
             'actual_return_date' => Carbon::today(),
+            'late_fee' => $lateFee,
+            'grand_total' => $borrowing->grand_total + $lateFee,
+            'payment_status' => $lateFee > 0 ? 'pending' : 'paid',
         ]);
 
-        return back()->with('success', '✅ Alat berhasil dikembalikan!');
+        $message = '✅ Alat berhasil dikembalikan!';
+        if ($lateFee > 0) {
+            $message .= ' Denda keterlambatan: Rp ' . number_format($lateFee, 0, ',', '.');
+        }
+
+        return back()->with('success', $message);
     }
 
     /**
@@ -312,7 +361,7 @@ class BorrowingController extends Controller
     }
 
     /**
-     * ✅ Show detail of user's own borrowing (METHOD YANG KURANG!)
+     * ✅ Show detail of user's own borrowing
      */
     public function showMyBorrowing($id)
     {
@@ -324,7 +373,7 @@ class BorrowingController extends Controller
     }
 
     /**
-     * ✅ Form create peminjaman untuk User (METHOD YANG KURANG!)
+     * ✅ Form create peminjaman untuk User
      */
     public function createRequest()
     {
@@ -334,11 +383,17 @@ class BorrowingController extends Controller
             ->with('category')
             ->get();
         
-        return view('borrowings.request-create', compact('items'));
+        // Get active discounts
+        $activeDiscounts = Discount::where('is_active', true)
+            ->where('start_date', '<=', Carbon::today())
+            ->where('end_date', '>=', Carbon::today())
+            ->get();
+        
+        return view('borrowings.request-create', compact('items', 'activeDiscounts'));
     }
 
     /**
-     * ✅ Store peminjaman dari User (METHOD YANG KURANG!)
+     * ✅ Store peminjaman dari User - UPDATED
      */
     public function storeRequest(Request $request)
     {
@@ -347,18 +402,32 @@ class BorrowingController extends Controller
             'borrow_date' => 'required|date|after_or_equal:today',
             'return_date' => 'required|date|after:borrow_date',
             'notes' => 'nullable|string|max:500',
+            // ✅ TAMBAHAN: Payment & Discount fields
+            'payment_method' => 'required|in:transfer,qris,cash',
+            'discount_code' => 'nullable|string|max:50',
         ], [
             'item_id.required' => 'Alat harus dipilih',
             'borrow_date.required' => 'Tanggal pinjam harus diisi',
             'borrow_date.after_or_equal' => 'Tanggal pinjam tidak boleh di masa lalu',
             'return_date.required' => 'Tanggal kembali harus diisi',
             'return_date.after' => 'Tanggal kembali harus setelah tanggal pinjam',
+            'payment_method.required' => 'Metode pembayaran harus dipilih',
         ]);
 
         $item = Item::findOrFail($validated['item_id']);
+        
         if ($item->stock_available <= 0) {
             return back()->with('error', '❌ Stok alat tidak tersedia!')->withInput();
         }
+        
+        // ✅ HITUNG HARGA
+        $priceData = $this->calculatePrice(
+            $item, 
+            $validated['borrow_date'], 
+            $validated['return_date'], 
+            $validated['discount_code'] ?? null,
+            true // User is member
+        );
 
         Borrowing::create([
             'user_id' => Auth::id(),
@@ -367,11 +436,110 @@ class BorrowingController extends Controller
             'return_date' => $validated['return_date'],
             'status' => 'pending',
             'notes' => $validated['notes'] ?? null,
+            // ✅ PRICE FIELDS
+            'rental_price_per_day' => $priceData['price_per_day'],
+            'total_days' => $priceData['total_days'],
+            'subtotal' => $priceData['subtotal'],
+            'discount_code' => $validated['discount_code'] ?? null,
+            'discount_amount' => $priceData['discount_amount'],
+            'total_after_discount' => $priceData['total_after_discount'],
+            'deposit_paid' => $priceData['deposit'],
+            'grand_total' => $priceData['grand_total'],
+            'payment_method' => $validated['payment_method'],
+            'payment_status' => 'pending',
         ]);
 
         return redirect()->route('borrowings.my')
-            ->with('success', '✅ Permintaan peminjaman berhasil dibuat! Menunggu approval.');
+            ->with('success', '✅ Permintaan peminjaman berhasil dibuat! Total: Rp ' . number_format($priceData['grand_total'], 0, ',', '.'));
     }
 
-    
+    /**
+     * ✅ Validate discount code (AJAX)
+     */
+    public function validateDiscountCode(Request $request)
+    {
+        $discount = Discount::where('code', $request->code)->first();
+        
+        if (!$discount) {
+            return response()->json(['valid' => false, 'message' => 'Kode diskon tidak valid']);
+        }
+
+        if (!$discount->isValid()) {
+            return response()->json(['valid' => false, 'message' => 'Diskon tidak aktif atau sudah kadaluarsa']);
+        }
+
+        return response()->json([
+            'valid' => true,
+            'discount' => [
+                'name' => $discount->name,
+                'type' => $discount->type,
+                'value' => $discount->value,
+            ]
+        ]);
+    }
+
+    // ==========================================
+    // ✅ HELPER METHODS (YANG KURANG!)
+    // ==========================================
+
+    /**
+     * ✅ Calculate borrowing price
+     */
+    private function calculatePrice($item, $borrowDate, $returnDate, $discountCode = null, $isMember = false)
+    {
+        $borrowDate = Carbon::parse($borrowDate);
+        $returnDate = Carbon::parse($returnDate);
+        $totalDays = $borrowDate->diffInDays($returnDate) + 1;
+        
+        // Harga per hari
+        $pricePerDay = $isMember && $item->member_price > 0 ? $item->member_price : $item->rental_price;
+        
+        // Cek diskon item
+        if ($item->hasActiveDiscount()) {
+            $discount = $pricePerDay * ($item->discount_percentage / 100);
+            $pricePerDay -= $discount;
+        }
+        
+        // Subtotal
+        $subtotal = $pricePerDay * $totalDays;
+        
+        // Diskon kode kupon
+        $discountAmount = 0;
+        if ($discountCode) {
+            $discount = Discount::where('code', $discountCode)->first();
+            if ($discount && $discount->isValid()) {
+                $discountAmount = $discount->calculateDiscount($subtotal);
+                $discount->incrementUsage();
+            }
+        }
+        
+        $totalAfterDiscount = $subtotal - $discountAmount;
+        $grandTotal = $totalAfterDiscount + $item->deposit;
+        
+        return [
+            'price_per_day' => $pricePerDay,
+            'total_days' => $totalDays,
+            'subtotal' => $subtotal,
+            'discount_amount' => $discountAmount,
+            'total_after_discount' => $totalAfterDiscount,
+            'deposit' => $item->deposit,
+            'grand_total' => $grandTotal,
+        ];
+    }
+
+    /**
+     * ✅ Calculate late fee
+     */
+    private function calculateLateFee($item, $returnDate, $actualReturnDate = null)
+    {
+        $returnDate = Carbon::parse($returnDate);
+        $actualReturn = $actualReturnDate ? Carbon::parse($actualReturnDate) : Carbon::today();
+        
+        if ($actualReturn->lte($returnDate)) {
+            return 0;
+        }
+        
+        $lateDays = $returnDate->diffInDays($actualReturn);
+        return $item->late_fee * $lateDays;
+    }
 }

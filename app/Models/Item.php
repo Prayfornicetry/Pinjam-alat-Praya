@@ -20,7 +20,7 @@ class Item extends Model
         'condition',
         'image',
         'is_active',
-        // ✅ NEW FIELDS
+        // ✅ TAMBAHAN: Price Fields
         'rental_price',
         'member_price',
         'late_fee',
@@ -74,7 +74,7 @@ class Item extends Model
         return true;
     }
 
-    // ✅ Get final price (with discount if available)
+    // ✅ Get final price
     public function getFinalPrice($isMember = false)
     {
         $basePrice = $isMember && $this->member_price > 0 ? $this->member_price : $this->rental_price;
