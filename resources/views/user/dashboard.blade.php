@@ -183,7 +183,7 @@
                     <h6 class="mb-0 fw-bold">
                         <i class="bi bi-box-seam me-2 text-primary"></i>Alat Tersedia
                     </h6>
-                    <a href="{{ route('items.index') }}" class="btn btn-sm btn-outline-primary">
+                    <a href="{{ route('items.user.index') }}" class="btn btn-sm btn-outline-primary">
                         <i class="bi bi-list-ul me-1 d-none d-sm-inline"></i>Lihat Semua
                     </a>
                 </div>

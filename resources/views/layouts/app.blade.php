@@ -31,63 +31,62 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
     <!-- Custom CSS -->
-    <style>
-        /* ==================== CSS VARIABLES - NATURAL EARTH TONE ==================== */
+<style>
+        /* ==================== CSS VARIABLES - NATURAL BALANCED THEME ==================== */
         :root {
             --sidebar-width: 280px;
             --sidebar-width-collapsed: 80px;
             --topbar-height: 70px;
             
-            /* 🌿 Natural Earth Colors (Muted & Soft) */
-            --primary-color: #3d5a3a;
-            --primary-light: #5a7c55;
-            --primary-dark: #2d4a2a;
+            /* 🌿 Natural Earth Colors (Balanced - Not Too Bright/Dark) */
+            --primary-color: #556b2f;
+            --primary-light: #6b8e23;
+            --primary-dark: #3d4f21;
             --secondary-color: #8b7355;
-            --success-color: #4a7c23;
-            --warning-color: #b9770e;
-            --danger-color: #a93226;
-            --info-color: #5b9bd5;
+            --success-color: #6b8e23;
+            --warning-color: #daa520;
+            --danger-color: #a52a2a;
+            --info-color: #5f9ea0;
             
-            /* 🍃 Natural Nature Gradients (Soft & Muted) */
-            --primary-gradient: linear-gradient(135deg, #4a7c23 0%, #3d5a3a 100%);
-            --primary-gradient-hover: linear-gradient(135deg, #3d5a3a 0%, #4a7c23 100%);
+            /* 🍃 Natural Nature Gradients (Subtle & Balanced) */
+            --primary-gradient: linear-gradient(135deg, #6b8e23 0%, #556b2f 100%);
+            --primary-gradient-hover: linear-gradient(135deg, #556b2f 0%, #6b8e23 100%);
             --secondary-gradient: linear-gradient(135deg, #8b7355 0%, #6d5a43 100%);
-            --success-gradient: linear-gradient(135deg, #5a8f3a 0%, #4a7c23 100%);
-            --warning-gradient: linear-gradient(135deg, #c4915d 0%, #b9770e 100%);
-            --danger-gradient: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
-            --info-gradient: linear-gradient(135deg, #7fb3d5 0%, #5b9bd5 100%);
-            --forest-gradient: linear-gradient(135deg, #5a7c55 0%, #4a7c23 50%, #3d5a3a 100%);
+            --success-gradient: linear-gradient(135deg, #7d9f3f 0%, #6b8e23 100%);
+            --warning-gradient: linear-gradient(135deg, #e6c86e 0%, #daa520 100%);
+            --danger-gradient: linear-gradient(135deg, #c05040 0%, #a52a2a 100%);
+            --info-gradient: linear-gradient(135deg, #7fb3b5 0%, #5f9ea0 100%);
+            --forest-gradient: linear-gradient(135deg, #6b8e23 0%, #556b2f 50%, #3d4f21 100%);
             --earth-gradient: linear-gradient(135deg, #a08060 0%, #8b7355 100%);
-            --sky-gradient: linear-gradient(135deg, #a8d5ba 0%, #7fb3d5 100%);
             
-            /* 🌲 Natural Sidebar (Forest Green) */
-            --sidebar-bg: linear-gradient(180deg, #1a2f1a 0%, #2d4a2d 50%, #3d5a3a 100%);
-            --sidebar-hover: rgba(90, 124, 85, 0.3);
-            --sidebar-active: linear-gradient(90deg, rgba(74, 124, 35, 0.4) 0%, transparent 100%);
+            /* 🌲 Natural Sidebar (Balanced Forest Green) */
+            --sidebar-bg: linear-gradient(180deg, #2d3a1e 0%, #3d4f21 50%, #556b2f 100%);
+            --sidebar-hover: rgba(107, 142, 35, 0.25);
+            --sidebar-active: linear-gradient(90deg, rgba(107, 142, 35, 0.35) 0%, transparent 100%);
             
-            /* 🍂 Natural Background (Soft Earth Tone) */
-            --body-bg: linear-gradient(135deg, #f5f8f5 0%, #e8efe8 50%, #e3f2e8 100%);
-            --card-bg: rgba(255, 255, 255, 0.98);
-            --card-header-bg: linear-gradient(135deg, #ffffff 0%, #f1f8f1 100%);
+            /* 🍂 Natural Background (Soft Earth Tone - Balanced) */
+            --body-bg: linear-gradient(135deg, #f5f5f0 0%, #e8ece5 50%, #e0e5dc 100%);
+            --card-bg: rgba(255, 255, 255, 0.97);
+            --card-header-bg: linear-gradient(135deg, #ffffff 0%, #f5f5f0 100%);
             
-            /* ✏️ Natural Text Colors */
-            --text-primary: #2d4a2a;
-            --text-secondary: #3d5a3a;
-            --text-muted: #5a7c55;
+            /* ✏️ Text Colors (Balanced Contrast) */
+            --text-primary: #2d3a1e;
+            --text-secondary: #3d4f21;
+            --text-muted: #6b7b5f;
             --text-light: #ffffff;
             
-            /* 💫 Soft Natural Shadows */
-            --shadow-sm: 0 2px 8px rgba(61, 90, 58, 0.12);
-            --shadow-md: 0 4px 20px rgba(61, 90, 58, 0.15);
-            --shadow-lg: 0 10px 40px rgba(61, 90, 58, 0.18);
-            --shadow-xl: 0 20px 60px rgba(61, 90, 58, 0.2);
-            --shadow-glow: 0 0 30px rgba(74, 124, 35, 0.3);
-            --shadow-neon: 0 0 20px rgba(74, 124, 35, 0.4), 0 0 40px rgba(91, 155, 213, 0.3);
+            /* 💫 Balanced Shadows (Natural Depth) */
+            --shadow-sm: 0 2px 8px rgba(85, 107, 47, 0.12);
+            --shadow-md: 0 4px 20px rgba(85, 107, 47, 0.15);
+            --shadow-lg: 0 10px 40px rgba(85, 107, 47, 0.18);
+            --shadow-xl: 0 20px 60px rgba(85, 107, 47, 0.22);
+            --shadow-glow: 0 0 25px rgba(107, 142, 35, 0.35);
+            --shadow-neon: 0 0 15px rgba(107, 142, 35, 0.4), 0 0 30px rgba(85, 107, 47, 0.3);
             
-            /* 🔲 Soft Natural Borders */
-            --border-light: rgba(90, 124, 85, 0.25);
-            --border-medium: rgba(90, 124, 85, 0.4);
-            --border-dark: rgba(61, 90, 58, 0.6);
+            /* 🔲 Balanced Borders (Subtle) */
+            --border-light: rgba(107, 142, 35, 0.25);
+            --border-medium: rgba(107, 142, 35, 0.4);
+            --border-dark: rgba(85, 107, 47, 0.6);
             
             /* ⚡ Transitions */
             --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -113,7 +112,7 @@
             line-height: 1.6;
         }
 
-        /* ✨ Subtle Natural Background (No Animation) */
+        /* ✨ Subtle Natural Background (No Animation - More Calm) */
         body::before {
             content: '';
             position: fixed;
@@ -122,12 +121,12 @@
             width: 100%;
             height: 100%;
             background: 
-                radial-gradient(circle at 20% 50%, rgba(74, 124, 35, 0.06) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(91, 155, 213, 0.06) 0%, transparent 50%);
+                radial-gradient(circle at 20% 50%, rgba(107, 142, 35, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(85, 107, 47, 0.08) 0%, transparent 50%);
             z-index: -1;
         }
 
-        /* ==================== SIDEBAR - NATURAL FOREST ==================== */
+        /* ==================== SIDEBAR - NATURAL BALANCED ==================== */
         .sidebar {
             width: var(--sidebar-width);
             min-height: 100vh;
@@ -154,7 +153,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            border-bottom: 2px solid rgba(255,255,255,0.12);
+            border-bottom: 2px solid rgba(255,255,255,0.15);
             padding: 0 20px;
             background: rgba(255,255,255,0.05);
             position: sticky;
@@ -184,7 +183,7 @@
         .sidebar-menu { padding: 15px 0; }
 
         .sidebar-menu .menu-label {
-            color: rgba(255,255,255,0.45);
+            color: rgba(255,255,255,0.5);
             font-size: 0.65rem;
             font-weight: 700;
             text-transform: uppercase;
@@ -206,7 +205,7 @@
         }
 
         .sidebar-menu a {
-            color: rgba(255,255,255,0.8);
+            color: rgba(255,255,255,0.85);
             text-decoration: none;
             padding: 12px 20px;
             display: flex;
@@ -286,8 +285,8 @@
             padding: 3px 8px;
             border-radius: 15px;
             font-weight: 600;
-            background: var(--danger-gradient);
-            box-shadow: 0 2px 8px rgba(169, 50, 38, 0.4);
+            background: var(--warning-gradient);
+            box-shadow: 0 2px 8px rgba(218, 165, 32, 0.4);
         }
 
         /* ==================== MAIN CONTENT ==================== */
@@ -299,10 +298,10 @@
             flex-direction: column;
         }
 
-        /* ==================== TOPBAR - NATURAL ==================== */
+        /* ==================== TOPBAR - NATURAL BALANCED ==================== */
         .topbar {
             height: var(--topbar-height);
-            background: rgba(255, 255, 255, 0.98);
+            background: rgba(255, 255, 255, 0.97);
             backdrop-filter: blur(20px) saturate(180%);
             box-shadow: var(--shadow-md);
             display: flex;
@@ -368,7 +367,7 @@
             text-align: center;
             font-weight: 700;
             border: 2px solid white;
-            box-shadow: 0 2px 8px rgba(169, 50, 38, 0.4);
+            box-shadow: 0 2px 8px rgba(165, 42, 42, 0.4);
         }
 
         .user-dropdown {
@@ -428,7 +427,7 @@
             flex: 1;
         }
 
-        /* ==================== CARDS - NATURAL ==================== */
+        /* ==================== CARDS - NATURAL BALANCED ==================== */
         .card {
             border: 2px solid var(--border-light);
             border-radius: 20px;
@@ -473,7 +472,7 @@
 
         .card-body { padding: 20px; }
 
-        /* ==================== TABLES - NATURAL ==================== */
+        /* ==================== TABLES - NATURAL BALANCED ==================== */
         .table-responsive {
             border-radius: 15px;
             overflow-x: auto;
@@ -508,7 +507,7 @@
         }
 
         .table tbody tr:hover {
-            background: linear-gradient(90deg, rgba(74, 124, 35, 0.05) 0%, transparent 100%);
+            background: linear-gradient(90deg, rgba(107, 142, 35, 0.06) 0%, transparent 100%);
         }
 
         .table tbody td {
@@ -520,7 +519,7 @@
             line-height: 1.4;
         }
 
-        /* ==================== STAT CARDS - NATURAL ==================== */
+        /* ==================== STAT CARDS - NATURAL BALANCED ==================== */
         .stat-card {
             background: var(--card-bg);
             border: 2px solid var(--border-light);
@@ -550,28 +549,28 @@
             background: var(--success-gradient);
             color: var(--text-light);
             border: none;
-            box-shadow: 0 0 25px rgba(74, 124, 35, 0.35);
+            box-shadow: 0 0 25px rgba(107, 142, 35, 0.35);
         }
 
         .stat-card.warning {
             background: var(--warning-gradient);
             color: var(--text-light);
             border: none;
-            box-shadow: 0 0 25px rgba(185, 119, 14, 0.35);
+            box-shadow: 0 0 25px rgba(218, 165, 32, 0.35);
         }
 
         .stat-card.danger {
             background: var(--danger-gradient);
             color: var(--text-light);
             border: none;
-            box-shadow: 0 0 25px rgba(169, 50, 38, 0.35);
+            box-shadow: 0 0 25px rgba(165, 42, 42, 0.35);
         }
 
         .stat-card.info {
             background: var(--info-gradient);
             color: var(--text-light);
             border: none;
-            box-shadow: 0 0 25px rgba(91, 155, 213, 0.35);
+            box-shadow: 0 0 25px rgba(95, 158, 160, 0.35);
         }
 
         .stat-card h3 {
@@ -587,7 +586,7 @@
             letter-spacing: 0.5px;
         }
 
-        /* ==================== BADGES - NATURAL ==================== */
+        /* ==================== BADGES - NATURAL BALANCED ==================== */
         .badge {
             padding: 5px 10px;
             border-radius: 15px;
@@ -601,31 +600,31 @@
         .bg-primary { 
             background: var(--primary-gradient) !important; 
             color: var(--text-light) !important;
-            box-shadow: 0 2px 8px rgba(74, 124, 35, 0.35);
+            box-shadow: 0 2px 8px rgba(107, 142, 35, 0.35);
         }
 
         .bg-success { 
             background: var(--success-gradient) !important; 
             color: var(--text-light) !important;
-            box-shadow: 0 2px 8px rgba(74, 124, 35, 0.35);
+            box-shadow: 0 2px 8px rgba(107, 142, 35, 0.35);
         }
 
         .bg-warning { 
             background: var(--warning-gradient) !important; 
             color: white !important;
-            box-shadow: 0 2px 8px rgba(185, 119, 14, 0.35);
+            box-shadow: 0 2px 8px rgba(218, 165, 32, 0.35);
         }
 
         .bg-danger { 
             background: var(--danger-gradient) !important; 
             color: var(--text-light) !important;
-            box-shadow: 0 2px 8px rgba(169, 50, 38, 0.35);
+            box-shadow: 0 2px 8px rgba(165, 42, 42, 0.35);
         }
 
         .bg-info { 
             background: var(--info-gradient) !important; 
             color: var(--text-light) !important;
-            box-shadow: 0 2px 8px rgba(91, 155, 213, 0.35);
+            box-shadow: 0 2px 8px rgba(95, 158, 160, 0.35);
         }
 
         .bg-secondary { 
@@ -633,7 +632,7 @@
             color: var(--text-light) !important;
         }
 
-        /* ==================== BUTTONS - NATURAL ==================== */
+        /* ==================== BUTTONS - NATURAL BALANCED ==================== */
         .btn {
             border-radius: 12px;
             padding: 8px 16px;
@@ -683,7 +682,7 @@
 
         .btn-success:hover {
             transform: translateY(-2px);
-            box-shadow: 0 0 15px rgba(74, 124, 35, 0.4);
+            box-shadow: 0 0 15px rgba(107, 142, 35, 0.4);
         }
 
         .btn-warning {
@@ -722,7 +721,7 @@
             font-size: 0.75rem;
         }
 
-        /* ==================== FLASH MESSAGES - NATURAL ==================== */
+        /* ==================== FLASH MESSAGES - NATURAL BALANCED ==================== */
         .flash-message {
             position: fixed;
             top: 85px;
@@ -750,17 +749,17 @@
 
         .flash-message .alert-success { 
             background: var(--success-gradient);
-            box-shadow: 0 5px 20px rgba(74, 124, 35, 0.35);
+            box-shadow: 0 5px 20px rgba(107, 142, 35, 0.35);
         }
 
         .flash-message .alert-danger { 
             background: var(--danger-gradient);
-            box-shadow: 0 5px 20px rgba(169, 50, 38, 0.35);
+            box-shadow: 0 5px 20px rgba(165, 42, 42, 0.35);
         }
 
         .flash-message .alert-warning { 
             background: var(--warning-gradient);
-            box-shadow: 0 5px 20px rgba(185, 119, 14, 0.35);
+            box-shadow: 0 5px 20px rgba(218, 165, 32, 0.35);
         }
 
         /* ==================== FOOTER ==================== */
@@ -772,7 +771,7 @@
             font-size: 0.8rem;
         }
 
-        /* ==================== DROPDOWN - NATURAL ==================== */
+        /* ==================== DROPDOWN - NATURAL BALANCED ==================== */
         .dropdown-menu {
             border-radius: 15px;
             box-shadow: var(--shadow-xl);
@@ -803,7 +802,7 @@
         }
 
         .dropdown-item:hover {
-            background: linear-gradient(90deg, rgba(74, 124, 35, 0.1) 0%, transparent 100%);
+            background: linear-gradient(90deg, rgba(107, 142, 35, 0.1) 0%, transparent 100%);
             color: var(--primary-color);
             padding-left: 20px;
         }
@@ -813,7 +812,7 @@
         .dropdown-item.text-danger:hover { 
             background: var(--danger-gradient); 
             color: var(--text-light);
-            box-shadow: 0 2px 8px rgba(169, 50, 38, 0.35);
+            box-shadow: 0 2px 8px rgba(165, 42, 42, 0.35);
         }
         .dropdown-item.text-danger:hover i { color: var(--text-light); }
 
@@ -829,7 +828,7 @@
             padding: 8px 15px;
         }
 
-        /* ==================== FORMS - NATURAL ==================== */
+        /* ==================== FORMS - NATURAL BALANCED ==================== */
         .form-control, .form-select {
             border-radius: 12px;
             border: 2px solid var(--border-light);
@@ -841,7 +840,7 @@
 
         .form-control:focus, .form-select:focus {
             border-color: var(--primary-light);
-            box-shadow: 0 0 0 0.2rem rgba(74, 124, 35, 0.15);
+            box-shadow: 0 0 0 0.2rem rgba(107, 142, 35, 0.2);
             outline: none;
             background: white;
         }

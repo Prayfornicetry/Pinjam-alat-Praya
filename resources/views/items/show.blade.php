@@ -3,24 +3,25 @@
 @section('title', 'Detail Alat')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
     <div>
         <h4 class="mb-0 fw-bold text-dark">
-            <i class="bi bi-box-seam me-2 text-primary"></i>Detail Alat
+            <i class="bi bi-eye me-2 text-primary"></i>Detail Alat
         </h4>
         <p class="text-muted mb-0">Informasi lengkap inventaris alat</p>
     </div>
     <div class="d-flex gap-2">
-        <a href="{{ route('items.edit', $item->id) }}" class="btn btn-warning">
+        @if(Auth::user()->isAdmin() || Auth::user()->isStaff())
+        <a href="{{ route('items.edit', $item->id) }}" class="btn btn-warning text-white">
             <i class="bi bi-pencil me-2"></i>Edit
         </a>
+        @endif
         <a href="{{ route('items.index') }}" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left me-2"></i>Kembali
         </a>
     </div>
 </div>
 
-<!-- Flash Messages -->
 @if(session('success'))
 <div class="alert alert-success alert-dismissible fade show" role="alert">
     <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
@@ -40,21 +41,21 @@
     <div class="col-lg-5">
         <!-- Item Image -->
         <div class="card border-0 shadow-sm mb-3">
-            <div class="card-body text-center">
+            <div class="card-body p-0">
                 @if($item->image && file_exists(public_path('storage/' . $item->image)))
                     <img src="{{ asset('storage/' . $item->image) }}" 
                          alt="{{ $item->name }}" 
-                         class="img-fluid rounded" 
+                         class="img-fluid w-100 rounded-top" 
                          style="max-height: 300px; object-fit: cover;">
                 @else
-                    <div class="bg-light rounded d-flex align-items-center justify-content-center" 
+                    <div class="bg-light d-flex align-items-center justify-content-center" 
                          style="height: 300px;">
                         <i class="bi bi-box-seam text-muted" style="font-size: 5rem;"></i>
                     </div>
                 @endif
             </div>
         </div>
-        
+
         <!-- Quick Stats -->
         <div class="row g-3 mb-3">
             <div class="col-6">
@@ -74,7 +75,93 @@
                 </div>
             </div>
         </div>
-        
+
+        <!-- ✅ TAMBAHAN: Price Information Card -->
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-header bg-white border-0 py-3">
+                <h6 class="mb-0 fw-bold">💰 Informasi Harga</h6>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-6">
+                        <div class="p-3 bg-light rounded text-center">
+                            <small class="text-muted d-block">Harga Normal</small>
+                            <h5 class="mb-0 text-primary fw-bold">
+                                Rp {{ number_format($item->rental_price ?? 0, 0, ',', '.') }}
+                            </h5>
+                            <small class="text-muted">/hari</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-3 bg-light rounded text-center">
+                            <small class="text-muted d-block">Harga Member</small>
+                            <h5 class="mb-0 text-success fw-bold">
+                                Rp {{ number_format($item->member_price ?? 0, 0, ',', '.') }}
+                            </h5>
+                            <small class="text-muted">/hari</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-3 bg-light rounded text-center">
+                            <small class="text-muted d-block">Denda Terlambat</small>
+                            <h5 class="mb-0 text-warning fw-bold">
+                                Rp {{ number_format($item->late_fee ?? 0, 0, ',', '.') }}
+                            </h5>
+                            <small class="text-muted">/hari</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-3 bg-light rounded text-center">
+                            <small class="text-muted d-block">Deposit</small>
+                            <h5 class="mb-0 text-info fw-bold">
+                                Rp {{ number_format($item->deposit ?? 0, 0, ',', '.') }}
+                            </h5>
+                            <small class="text-muted">/pinjam</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Discount Info -->
+                @if($item->has_discount && $item->discount_percentage > 0)
+                <div class="mt-3 p-3 bg-danger bg-opacity-10 rounded border border-danger">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-percent text-danger me-2 fs-4"></i>
+                        <div class="flex-grow-1">
+                            <h6 class="mb-0 text-danger fw-bold">Diskon Aktif: {{ $item->discount_percentage }}%</h6>
+                            @if($item->discount_start && $item->discount_end)
+                            <small class="text-muted">
+                                {{ \Carbon\Carbon::parse($item->discount_start)->format('d M Y') }} 
+                                - {{ \Carbon\Carbon::parse($item->discount_end)->format('d M Y') }}
+                            </small>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+                @endif
+
+                <!-- Price Calculation Example -->
+                <div class="mt-3 p-3 bg-light rounded">
+                    <h6 class="mb-2 fw-bold">📊 Contoh Perhitungan:</h6>
+                    <table class="table table-sm table-borderless mb-0" style="font-size: 0.85rem;">
+                        <tr>
+                            <td class="text-muted">Pinjam 3 hari:</td>
+                            <td class="text-end">Rp {{ number_format(($item->rental_price ?? 0) * 3, 0, ',', '.') }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Deposit:</td>
+                            <td class="text-end">Rp {{ number_format($item->deposit ?? 0, 0, ',', '.') }}</td>
+                        </tr>
+                        <tr class="border-top">
+                            <td class="text-muted fw-bold">Total:</td>
+                            <td class="text-end fw-bold text-primary">
+                                Rp {{ number_format((($item->rental_price ?? 0) * 3) + ($item->deposit ?? 0), 0, ',', '.') }}
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
         <!-- Item Information -->
         <div class="card border-0 shadow-sm mb-3">
             <div class="card-header bg-white border-0 py-3">
@@ -83,7 +170,7 @@
             <div class="card-body">
                 <table class="table table-borderless mb-0">
                     <tr>
-                        <td class="text-muted">Kode Alat</td>
+                        <td class="text-muted" width="40%">Kode Alat</td>
                         <td class="fw-bold">{{ $item->code }}</td>
                     </tr>
                     <tr>
@@ -146,8 +233,24 @@
                 </table>
             </div>
         </div>
+
+        <!-- Delete Button (Admin Only) -->
+        @if(Auth::user()->isAdmin())
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <form action="{{ route('items.destroy', $item->id) }}" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    
+                    <button type="button" class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                        <i class="bi bi-trash me-2"></i>Hapus Alat
+                    </button>
+                </form>
+            </div>
+        </div>
+        @endif
     </div>
-    
+
     <!-- Right Column - Borrowing History & Actions -->
     <div class="col-lg-7">
         <!-- Borrowing Statistics -->
@@ -177,7 +280,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Current Borrowings -->
         <div class="card border-0 shadow-sm mb-3">
             <div class="card-header bg-white border-0 py-3">
@@ -257,7 +360,7 @@
                 @endif
             </div>
         </div>
-        
+
         <!-- Recent Borrowing History -->
         <div class="card border-0 shadow-sm">
             <div class="card-header bg-white border-0 py-3">
@@ -338,12 +441,14 @@
 </div>
 
 <!-- Delete Confirmation Modal -->
+@if(Auth::user()->isAdmin())
 <div class="modal fade" id="deleteModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
             <form action="{{ route('items.destroy', $item->id) }}" method="POST">
                 @csrf
                 @method('DELETE')
+                
                 <div class="modal-header">
                     <h5 class="modal-title">Hapus Alat</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -352,28 +457,28 @@
                     @php
                         $hasActiveBorrowings = $item->borrowings()->where('status', 'approved')->count() > 0;
                     @endphp
-                    
                     @if($hasActiveBorrowings)
-                    <div class="alert alert-danger">
-                        <i class="bi bi-exclamation-triangle me-2"></i>
-                        <strong>Tidak dapat menghapus!</strong> Alat ini masih memiliki peminjaman aktif.
-                    </div>
+                        <div class="alert alert-danger">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            <strong>Tidak dapat menghapus!</strong> Alat ini masih memiliki peminjaman aktif.
+                        </div>
                     @else
-                    <p>Apakah Anda yakin ingin menghapus alat <strong>{{ $item->name }}</strong>?</p>
-                    <p class="text-danger small">
-                        <i class="bi bi-info-circle me-1"></i>
-                        Tindakan ini tidak dapat dibatalkan.
-                    </p>
+                        <p>Apakah Anda yakin ingin menghapus alat <strong>{{ $item->name }}</strong>?</p>
+                        <p class="text-danger small">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Tindakan ini tidak dapat dibatalkan.
+                        </p>
                     @endif
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                     @if(!$hasActiveBorrowings)
-                    <button type="submit" class="btn btn-danger">Hapus</button>
+                        <button type="submit" class="btn btn-danger">Hapus</button>
                     @endif
                 </div>
             </form>
         </div>
     </div>
 </div>
+@endif
 @endsection
