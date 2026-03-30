@@ -11,6 +11,17 @@ use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\DiscountController; // ✅ TAMBAH INI
+
+// ==========================================
+// ✅ ROOT ROUTE (Langsung ke Login/Dashboard)
+// ==========================================
+Route::get('/', function () {
+    if (Auth::check()) {
+        return redirect()->route('dashboard');
+    }
+    return redirect()->route('login');
+});
 
 // ==========================================
 // GUEST ROUTES (Belum Login)
@@ -42,6 +53,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/user/dashboard', [DashboardController::class, 'userDashboard'])->name('user.dashboard');
     Route::get('/staff/dashboard', [DashboardController::class, 'staffDashboard'])->name('staff.dashboard');
     
+    // Notification Routes (All Users)
+    Route::post('/notifications/mark-read', [NotificationController::class, 'markAsRead'])->name('notifications.mark-read');
+    Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllRead'])->name('notifications.mark-all-read');
+    
     // User Borrowing Routes (All Users)
     Route::get('/borrowing-request', [BorrowingController::class, 'createRequest'])->name('borrowing.request.create');
     Route::post('/borrowing-request', [BorrowingController::class, 'storeRequest'])->name('borrowing.request.store');
@@ -51,12 +66,8 @@ Route::middleware('auth')->group(function () {
     // History (All Users - see their own based on role)
     Route::get('/borrowings-history', [BorrowingController::class, 'history'])->name('borrowings.history');
     
-    // Notification Routes (All Users)
-    Route::post('/notifications/mark-read', [NotificationController::class, 'markAsRead'])->name('notifications.mark-read');
-    Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllRead'])->name('notifications.mark-all-read');
-    
     // ------------------------------------------
-    // USER READ-ONLY ITEMS (DEFINISIKAN SEBELUM ADMIN/STAFF!)
+    // USER READ-ONLY ITEMS
     // ------------------------------------------
     Route::middleware('role:user')->group(function () {
         Route::get('/catalog/items', [ItemController::class, 'userIndex'])->name('items.user.index');
@@ -87,16 +98,13 @@ Route::middleware('auth')->group(function () {
         // Users CRUD
         Route::resource('users', UserController::class);
         
-        // Add these routes inside admin middleware group
-
-// Discount Management (Admin Only)
-Route::middleware('role:admin')->group(function () {
-    Route::resource('discounts', DiscountController::class);
-    Route::post('/discounts/validate-code', [DiscountController::class, 'validateCode'])->name('discounts.validate-code');
-    
-    // Payment verification
-    Route::post('/borrowings/{id}/verify-payment', [BorrowingController::class, 'verifyPayment'])->name('borrowings.verify-payment');
-});
+        // ✅ Discount Management (Admin Only)
+        Route::resource('discounts', DiscountController::class);
+        Route::post('/discounts/validate-code', [DiscountController::class, 'validateCode'])->name('discounts.validate-code');
+        
+        // Payment verification
+        Route::post('/borrowings/{id}/verify-payment', [BorrowingController::class, 'verifyPayment'])->name('borrowings.verify-payment');
+        
         // Settings
         Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');
         Route::post('settings', [SettingsController::class, 'update'])->name('settings.update');
