@@ -70,28 +70,45 @@
     @forelse($items as $item)
     <div class="col-md-6 col-lg-4 col-xl-3">
         <div class="card border-0 shadow-sm h-100 position-relative">
-            <!-- Stock Badge -->
+            
+            <!-- ✅ STOCK STATUS BADGE -->
             @if($item->stock_available <= 0)
                 <div class="position-absolute top-0 end-0 m-2 z-3">
-                    <span class="badge bg-danger px-3 py-2">Stok Habis</span>
+                    <span class="badge bg-danger px-3 py-2" style="font-size: 0.85rem;">
+                        <i class="bi bi-x-circle me-1"></i>Stok Habis
+                    </span>
                 </div>
             @elseif($item->stock_available <= 2)
                 <div class="position-absolute top-0 end-0 m-2 z-3">
-                    <span class="badge bg-warning text-dark px-3 py-2">Stok Tersisa {{ $item->stock_available }}</span>
+                    <span class="badge bg-warning text-dark px-3 py-2" style="font-size: 0.85rem;">
+                        <i class="bi bi-exclamation-triangle me-1"></i>Stok Tersisa {{ $item->stock_available }}
+                    </span>
                 </div>
             @else
                 <div class="position-absolute top-0 end-0 m-2 z-3">
-                    <span class="badge bg-success px-3 py-2">Tersedia</span>
+                    <span class="badge bg-success px-3 py-2" style="font-size: 0.85rem;">
+                        <i class="bi bi-check-circle me-1"></i>Tersedia
+                    </span>
                 </div>
             @endif
 
-            <!-- Discount Badge -->
-            @if($item->hasActiveDiscount())
-                <div class="position-absolute top-0 start-0 m-2 z-3">
-                    <span class="badge bg-danger px-3 py-2">
-                        <i class="bi bi-percent me-1"></i>{{ $item->discount_percentage }}% OFF
-                    </span>
-                </div>
+            <!-- ✅ DISCOUNT BADGE -->
+            @php
+                $hasActiveDiscount = $item->has_discount && $item->discount_percentage > 0 && $item->hasActiveDiscount();
+                $discountedPrice = $hasActiveDiscount 
+                    ? $item->rental_price - ($item->rental_price * $item->discount_percentage / 100)
+                    : $item->rental_price;
+                $discountedMemberPrice = $hasActiveDiscount 
+                    ? $item->member_price - ($item->member_price * $item->discount_percentage / 100)
+                    : $item->member_price;
+            @endphp
+
+            @if($hasActiveDiscount)
+            <div class="position-absolute top-0 start-0 m-2 z-3">
+                <span class="badge bg-danger px-3 py-2" style="font-size: 0.85rem; animation: pulse 2s infinite;">
+                    <i class="bi bi-percent me-1"></i>{{ $item->discount_percentage }}% OFF
+                </span>
+            </div>
             @endif
 
             <!-- Item Image -->
@@ -144,27 +161,53 @@
                 <!-- ✅ PRICE INFORMATION CARD -->
                 <div class="card bg-light border-0 mb-3">
                     <div class="card-body py-2 px-3">
-                        <h6 class="mb-2 fw-bold text-primary">
+                        <h6 class="mb-2 fw-bold text-primary" style="font-size: 0.85rem;">
                             <i class="bi bi-currency-dollar me-1"></i>Informasi Harga
                         </h6>
                         
                         <!-- Rental Price -->
                         <div class="d-flex justify-content-between align-items-center mb-1">
                             <small class="text-muted">Harga Sewa:</small>
-                            <span class="fw-bold text-primary">
-                                Rp {{ number_format($item->rental_price ?? 0, 0, ',', '.') }}
-                                <small class="text-muted">/hari</small>
-                            </span>
+                            @if($hasActiveDiscount)
+                                <div>
+                                    <span class="text-decoration-line-through text-muted small">
+                                        Rp {{ number_format($item->rental_price, 0, ',', '.') }}
+                                    </span>
+                                    <br>
+                                    <span class="fw-bold text-primary">
+                                        Rp {{ number_format($discountedPrice, 0, ',', '.') }}
+                                    </span>
+                                    <small class="text-muted">/hari</small>
+                                </div>
+                            @else
+                                <span class="fw-bold text-primary">
+                                    Rp {{ number_format($item->rental_price ?? 0, 0, ',', '.') }}
+                                    <small class="text-muted">/hari</small>
+                                </span>
+                            @endif
                         </div>
 
-                        <!-- Member Price (if different) -->
-                        @if($item->member_price > 0 && $item->member_price < $item->rental_price)
+                        <!-- Member Price -->
+                        @if($item->member_price > 0)
                         <div class="d-flex justify-content-between align-items-center mb-1">
                             <small class="text-muted">Harga Member:</small>
-                            <span class="fw-bold text-success">
-                                Rp {{ number_format($item->member_price, 0, ',', '.') }}
-                                <small class="text-muted">/hari</small>
-                            </span>
+                            @if($hasActiveDiscount)
+                                <div>
+                                    <span class="text-decoration-line-through text-muted small">
+                                        Rp {{ number_format($item->member_price, 0, ',', '.') }}
+                                    </span>
+                                    <br>
+                                    <span class="fw-bold text-success">
+                                        Rp {{ number_format($discountedMemberPrice, 0, ',', '.') }}
+                                    </span>
+                                    <small class="text-muted">/hari</small>
+                                </div>
+                            @else
+                                <span class="fw-bold text-success">
+                                    Rp {{ number_format($item->member_price, 0, ',', '.') }}
+                                    <small class="text-muted">/hari</small>
+                                </span>
+                            @endif
                         </div>
                         @endif
 
@@ -194,7 +237,7 @@
                         @endif
 
                         <!-- Discount Info -->
-                        @if($item->hasActiveDiscount())
+                        @if($hasActiveDiscount)
                         <div class="mt-2 p-2 bg-danger bg-opacity-10 rounded">
                             <small class="text-danger fw-bold">
                                 <i class="bi bi-percent me-1"></i>Diskon {{ $item->discount_percentage }}% Aktif!
@@ -222,7 +265,7 @@
                         <i class="bi bi-eye me-1"></i> Lihat Detail
                     </a>
                     
-                    @if($item->stock_available > 0)
+                    @if($item->stock_available > 0 && $item->is_active)
                         <a href="{{ route('borrowing.request.create') }}?item_id={{ $item->id }}" 
                            class="btn btn-primary btn-sm">
                             <i class="bi bi-cart-plus me-1"></i> Pinjam Sekarang
@@ -303,6 +346,21 @@
     </div>
 </div>
 @endsection
+
+@push('styles')
+<style>
+@keyframes pulse {
+    0%, 100% { 
+        transform: scale(1); 
+        opacity: 1; 
+    }
+    50% { 
+        transform: scale(1.05); 
+        opacity: 0.85; 
+    }
+}
+</style>
+@endpush
 
 @push('scripts')
 <script>

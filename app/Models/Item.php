@@ -54,25 +54,27 @@ class Item extends Model
         return $this->hasMany(Borrowing::class);
     }
 
-    // ✅ Check if discount is active
-    public function hasActiveDiscount()
-    {
-        if (!$this->has_discount) {
-            return false;
-        }
-
-        $today = Carbon::today();
-        
-        if ($this->discount_start && $today->lt($this->discount_start)) {
-            return false;
-        }
-
-        if ($this->discount_end && $today->gt($this->discount_end)) {
-            return false;
-        }
-
-        return true;
+/**
+ * ✅ Check if discount is active
+ */
+public function hasActiveDiscount()
+{
+    if (!$this->has_discount) {
+        return false;
     }
+
+    $today = Carbon::today();
+    
+    if ($this->discount_start && $today->lt($this->discount_start)) {
+        return false;
+    }
+
+    if ($this->discount_end && $today->gt($this->discount_end)) {
+        return false;
+    }
+
+    return true;
+}
 
     // ✅ Get final price
     public function getFinalPrice($isMember = false)
@@ -96,4 +98,6 @@ class Item extends Model
 
         return $this->late_fee * $daysLate;
     }
+
+    
 }

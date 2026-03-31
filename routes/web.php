@@ -14,16 +14,6 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\DiscountController; // ✅ TAMBAH INI
 
 // ==========================================
-// ✅ ROOT ROUTE (Langsung ke Login/Dashboard)
-// ==========================================
-Route::get('/', function () {
-    if (Auth::check()) {
-        return redirect()->route('dashboard');
-    }
-    return redirect()->route('login');
-});
-
-// ==========================================
 // GUEST ROUTES (Belum Login)
 // ==========================================
 Route::middleware('guest')->group(function () {
@@ -67,7 +57,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/borrowings-history', [BorrowingController::class, 'history'])->name('borrowings.history');
     
     // ------------------------------------------
-    // USER READ-ONLY ITEMS
+    // USER READ-ONLY ITEMS (DEFINISIKAN SEBELUM ADMIN/STAFF!)
     // ------------------------------------------
     Route::middleware('role:user')->group(function () {
         Route::get('/catalog/items', [ItemController::class, 'userIndex'])->name('items.user.index');
@@ -102,7 +92,7 @@ Route::middleware('auth')->group(function () {
         Route::resource('discounts', DiscountController::class);
         Route::post('/discounts/validate-code', [DiscountController::class, 'validateCode'])->name('discounts.validate-code');
         
-        // Payment verification
+        // Payment verification (Admin Only)
         Route::post('/borrowings/{id}/verify-payment', [BorrowingController::class, 'verifyPayment'])->name('borrowings.verify-payment');
         
         // Settings

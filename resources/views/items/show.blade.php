@@ -53,6 +53,36 @@
                         <i class="bi bi-box-seam text-muted" style="font-size: 5rem;"></i>
                     </div>
                 @endif
+                
+                <!-- Stock Status Badge -->
+                @if($item->stock_available <= 0)
+                    <div class="position-absolute top-0 end-0 m-3">
+                        <span class="badge bg-danger px-3 py-2" style="font-size: 0.9rem;">
+                            <i class="bi bi-x-circle me-1"></i>Stok Habis
+                        </span>
+                    </div>
+                @elseif($item->stock_available <= 2)
+                    <div class="position-absolute top-0 end-0 m-3">
+                        <span class="badge bg-warning text-dark px-3 py-2" style="font-size: 0.9rem;">
+                            <i class="bi bi-exclamation-triangle me-1"></i>Stok Tersisa {{ $item->stock_available }}
+                        </span>
+                    </div>
+                @else
+                    <div class="position-absolute top-0 end-0 m-3">
+                        <span class="badge bg-success px-3 py-2" style="font-size: 0.9rem;">
+                            <i class="bi bi-check-circle me-1"></i>Tersedia
+                        </span>
+                    </div>
+                @endif
+                
+                <!-- ✅ DISCOUNT BADGE (MORE PROMINENT) -->
+                @if($item->has_discount && $item->discount_percentage > 0 && $item->hasActiveDiscount())
+                <div class="position-absolute top-0 start-0 m-3">
+                    <span class="badge bg-danger px-4 py-3" style="font-size: 1rem; animation: pulse 2s infinite;">
+                        <i class="bi bi-percent me-1"></i>Diskon {{ $item->discount_percentage }}%
+                    </span>
+                </div>
+                @endif
             </div>
         </div>
 
@@ -76,43 +106,95 @@
             </div>
         </div>
 
-        <!-- ✅ TAMBAHAN: Price Information Card -->
+        <!-- ✅ INFORMASI HARGA (IMPROVED) -->
         <div class="card border-0 shadow-sm mb-3">
             <div class="card-header bg-white border-0 py-3">
                 <h6 class="mb-0 fw-bold">💰 Informasi Harga</h6>
             </div>
             <div class="card-body">
+                @php
+                    $hasActiveDiscount = $item->has_discount && $item->discount_percentage > 0 && $item->hasActiveDiscount();
+                    $discountedPrice = $hasActiveDiscount 
+                        ? $item->rental_price - ($item->rental_price * $item->discount_percentage / 100)
+                        : $item->rental_price;
+                    $discountedMemberPrice = $hasActiveDiscount 
+                        ? $item->member_price - ($item->member_price * $item->discount_percentage / 100)
+                        : $item->member_price;
+                    $savings = $item->rental_price - $discountedPrice;
+                @endphp
+
                 <div class="row g-3">
+                    <!-- Harga Normal -->
                     <div class="col-6">
-                        <div class="p-3 bg-light rounded text-center">
-                            <small class="text-muted d-block">Harga Normal</small>
-                            <h5 class="mb-0 text-primary fw-bold">
-                                Rp {{ number_format($item->rental_price ?? 0, 0, ',', '.') }}
-                            </h5>
+                        <div class="p-3 {{ $hasActiveDiscount ? 'bg-light' : 'bg-primary bg-opacity-10' }} rounded text-center" 
+                             style="border: 2px solid {{ $hasActiveDiscount ? '#e0e0e0' : '#556b2f' }};">
+                            <small class="text-muted d-block mb-2">Harga Normal</small>
+                            @if($hasActiveDiscount)
+                                <div class="text-decoration-line-through text-muted mb-1" style="font-size: 0.9rem;">
+                                    Rp {{ number_format($item->rental_price, 0, ',', '.') }}
+                                </div>
+                            @endif
+                            <h4 class="mb-0 {{ $hasActiveDiscount ? 'text-dark' : 'text-primary' }} fw-bold" 
+                                style="font-size: 1.3rem;">
+                                Rp {{ number_format($discountedPrice, 0, ',', '.') }}
+                            </h4>
                             <small class="text-muted">/hari</small>
+                            @if($hasActiveDiscount)
+                                <div class="mt-2">
+                                    <span class="badge bg-success" style="font-size: 0.75rem;">
+                                        Hemat Rp {{ number_format($savings, 0, ',', '.') }}
+                                    </span>
+                                </div>
+                            @endif
                         </div>
                     </div>
+
+                    <!-- Harga Member -->
                     <div class="col-6">
-                        <div class="p-3 bg-light rounded text-center">
-                            <small class="text-muted d-block">Harga Member</small>
-                            <h5 class="mb-0 text-success fw-bold">
-                                Rp {{ number_format($item->member_price ?? 0, 0, ',', '.') }}
-                            </h5>
+                        <div class="p-3 {{ $hasActiveDiscount ? 'bg-light' : 'bg-success bg-opacity-10' }} rounded text-center"
+                             style="border: 2px solid {{ $hasActiveDiscount ? '#e0e0e0' : '#6b8e23' }};">
+                            <small class="text-muted d-block mb-2">Harga Member</small>
+                            @if($hasActiveDiscount)
+                                <div class="text-decoration-line-through text-muted mb-1" style="font-size: 0.9rem;">
+                                    Rp {{ number_format($item->member_price, 0, ',', '.') }}
+                                </div>
+                            @endif
+                            <h4 class="mb-0 {{ $hasActiveDiscount ? 'text-dark' : 'text-success' }} fw-bold"
+                                style="font-size: 1.3rem;">
+                                Rp {{ number_format($discountedMemberPrice, 0, ',', '.') }}
+                            </h4>
                             <small class="text-muted">/hari</small>
+                            @if($hasActiveDiscount)
+                                <div class="mt-2">
+                                    <span class="badge bg-success" style="font-size: 0.75rem;">
+                                        Hemat Rp {{ number_format($item->member_price - $discountedMemberPrice, 0, ',', '.') }}
+                                    </span>
+                                </div>
+                            @endif
                         </div>
                     </div>
+
+                    <!-- Denda -->
                     <div class="col-6">
-                        <div class="p-3 bg-light rounded text-center">
-                            <small class="text-muted d-block">Denda Terlambat</small>
+                        <div class="p-3 bg-warning bg-opacity-10 rounded text-center" 
+                             style="border: 2px solid #daa520;">
+                            <small class="text-muted d-block mb-2">
+                                <i class="bi bi-exclamation-triangle text-warning me-1"></i>Denda Terlambat
+                            </small>
                             <h5 class="mb-0 text-warning fw-bold">
                                 Rp {{ number_format($item->late_fee ?? 0, 0, ',', '.') }}
                             </h5>
                             <small class="text-muted">/hari</small>
                         </div>
                     </div>
+
+                    <!-- Deposit -->
                     <div class="col-6">
-                        <div class="p-3 bg-light rounded text-center">
-                            <small class="text-muted d-block">Deposit</small>
+                        <div class="p-3 bg-info bg-opacity-10 rounded text-center"
+                             style="border: 2px solid #5f9ea0;">
+                            <small class="text-muted d-block mb-2">
+                                <i class="bi bi-shield-check text-info me-1"></i>Deposit
+                            </small>
                             <h5 class="mb-0 text-info fw-bold">
                                 Rp {{ number_format($item->deposit ?? 0, 0, ',', '.') }}
                             </h5>
@@ -121,40 +203,71 @@
                     </div>
                 </div>
 
-                <!-- Discount Info -->
-                @if($item->has_discount && $item->discount_percentage > 0)
-                <div class="mt-3 p-3 bg-danger bg-opacity-10 rounded border border-danger">
+                <!-- ✅ DISCOUNT INFO BANNER (MORE VISIBLE) -->
+                @if($hasActiveDiscount)
+                <div class="mt-3 p-3 bg-danger bg-opacity-10 rounded border border-danger" 
+                     style="border-width: 2px;">
                     <div class="d-flex align-items-center">
-                        <i class="bi bi-percent text-danger me-2 fs-4"></i>
+                        <div class="me-3">
+                            <i class="bi bi-percent text-danger" style="font-size: 2.5rem;"></i>
+                        </div>
                         <div class="flex-grow-1">
-                            <h6 class="mb-0 text-danger fw-bold">Diskon Aktif: {{ $item->discount_percentage }}%</h6>
+                            <h6 class="mb-1 text-danger fw-bold" style="font-size: 1.1rem;">
+                                🎉 Diskon {{ $item->discount_percentage }}% Aktif!
+                            </h6>
                             @if($item->discount_start && $item->discount_end)
                             <small class="text-muted">
+                                <i class="bi bi-calendar3 me-1"></i>
                                 {{ \Carbon\Carbon::parse($item->discount_start)->format('d M Y') }} 
                                 - {{ \Carbon\Carbon::parse($item->discount_end)->format('d M Y') }}
                             </small>
                             @endif
+                            <br>
+                            <small class="text-danger fw-bold">
+                                <i class="bi bi-clock me-1"></i>
+                                Berakhir dalam {{ \Carbon\Carbon::today()->diffInDays($item->discount_end) }} hari
+                            </small>
                         </div>
                     </div>
                 </div>
                 @endif
 
-                <!-- Price Calculation Example -->
-                <div class="mt-3 p-3 bg-light rounded">
-                    <h6 class="mb-2 fw-bold">📊 Contoh Perhitungan:</h6>
-                    <table class="table table-sm table-borderless mb-0" style="font-size: 0.85rem;">
+                <!-- ✅ CONTOH PERHITUNGAN (UPDATED WITH DISCOUNT) -->
+                <div class="mt-3 p-3 bg-light rounded" style="border: 2px solid #e0e0e0;">
+                    <h6 class="mb-2 fw-bold">📊 Contoh Perhitungan (3 Hari):</h6>
+                    <table class="table table-sm table-borderless mb-0" style="font-size: 0.9rem;">
                         <tr>
-                            <td class="text-muted">Pinjam 3 hari:</td>
-                            <td class="text-end">Rp {{ number_format(($item->rental_price ?? 0) * 3, 0, ',', '.') }}</td>
+                            <td class="text-muted">Sewa 3 hari:</td>
+                            <td class="text-end">
+                                @if($hasActiveDiscount)
+                                    <span class="text-decoration-line-through text-muted">
+                                        Rp {{ number_format($item->rental_price * 3, 0, ',', '.') }}
+                                    </span>
+                                    <br>
+                                    <span class="text-primary fw-bold">
+                                        Rp {{ number_format($discountedPrice * 3, 0, ',', '.') }}
+                                    </span>
+                                @else
+                                    Rp {{ number_format($item->rental_price * 3, 0, ',', '.') }}
+                                @endif
+                            </td>
                         </tr>
+                        @if($hasActiveDiscount)
+                        <tr>
+                            <td class="text-success fw-bold">Total Hemat:</td>
+                            <td class="text-end text-success fw-bold">
+                                - Rp {{ number_format($savings * 3, 0, ',', '.') }}
+                            </td>
+                        </tr>
+                        @endif
                         <tr>
                             <td class="text-muted">Deposit:</td>
                             <td class="text-end">Rp {{ number_format($item->deposit ?? 0, 0, ',', '.') }}</td>
                         </tr>
-                        <tr class="border-top">
-                            <td class="text-muted fw-bold">Total:</td>
-                            <td class="text-end fw-bold text-primary">
-                                Rp {{ number_format((($item->rental_price ?? 0) * 3) + ($item->deposit ?? 0), 0, ',', '.') }}
+                        <tr class="border-top" style="border-width: 2px !important;">
+                            <td class="text-muted fw-bold">Total Bayar:</td>
+                            <td class="text-end fw-bold text-primary" style="font-size: 1.1rem;">
+                                Rp {{ number_format(($hasActiveDiscount ? $discountedPrice * 3 : $item->rental_price * 3) + ($item->deposit ?? 0), 0, ',', '.') }}
                             </td>
                         </tr>
                     </table>
@@ -170,7 +283,7 @@
             <div class="card-body">
                 <table class="table table-borderless mb-0">
                     <tr>
-                        <td class="text-muted" width="40%">Kode Alat</td>
+                        <td class="text-muted" style="width: 150px;">Kode Alat</td>
                         <td class="fw-bold">{{ $item->code }}</td>
                     </tr>
                     <tr>
@@ -481,4 +594,20 @@
     </div>
 </div>
 @endif
+
+<!-- CSS Animation for Discount Badge -->
+@push('styles')
+<style>
+@keyframes pulse {
+    0%, 100% { 
+        transform: scale(1); 
+        opacity: 1; 
+    }
+    50% { 
+        transform: scale(1.05); 
+        opacity: 0.85; 
+    }
+}
+</style>
+@endpush
 @endsection

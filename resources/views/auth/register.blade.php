@@ -70,7 +70,7 @@
 
     <!-- ✅ Phone (Optional) - SESUAI CONTROLLER -->
     <div class="mb-3">
-        <label for="phone" class="form-label">Nomor WhatsApp (Opsional)</label>
+        <label for="phone" class="form-label">Nomor Telp</label>
         <div class="input-group">
             <span class="input-group-text bg-light">
                 <i class="bi bi-phone"></i>
