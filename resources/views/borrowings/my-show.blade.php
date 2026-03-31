@@ -131,7 +131,7 @@
             </div>
         </div>
 
-        <!-- ✅ RINCIAN HARGA (NEW!) -->
+        <!-- ✅ RINCIAN HARGA LENGKAP (NEW!) -->
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-header bg-white border-0 py-3">
                 <h6 class="mb-0 fw-bold">💰 Rincian Harga</h6>
@@ -153,13 +153,19 @@
                         </tr>
                         @if($borrowing->discount_amount > 0)
                         <tr>
-                            <td class="text-muted text-success">Diskon:</td>
-                            <td class="text-end fw-bold text-success">- Rp {{ number_format($borrowing->discount_amount, 0, ',', '.') }}</td>
+                            <td class="text-success">
+                                <i class="bi bi-percent me-1"></i>Diskon:
+                            </td>
+                            <td class="text-end fw-bold text-success">
+                                - Rp {{ number_format($borrowing->discount_amount, 0, ',', '.') }}
+                            </td>
                         </tr>
                         @if($borrowing->discount_code)
                         <tr>
                             <td class="text-muted">Kode Diskon:</td>
-                            <td class="text-end"><span class="badge bg-success">{{ $borrowing->discount_code }}</span></td>
+                            <td class="text-end">
+                                <span class="badge bg-success">{{ $borrowing->discount_code }}</span>
+                            </td>
                         </tr>
                         @endif
                         @endif
@@ -169,21 +175,27 @@
                         </tr>
                         @if($borrowing->deposit_paid > 0)
                         <tr>
-                            <td class="text-muted">Deposit/Jaminan:</td>
-                            <td class="text-end fw-bold">Rp {{ number_format($borrowing->deposit_paid, 0, ',', '.') }}</td>
+                            <td class="text-info">
+                                <i class="bi bi-shield-check me-1"></i>Deposit/Jaminan:
+                            </td>
+                            <td class="text-end fw-bold text-info">
+                                Rp {{ number_format($borrowing->deposit_paid, 0, ',', '.') }}
+                            </td>
                         </tr>
                         @endif
                         @if($borrowing->late_fee > 0)
                         <tr>
-                            <td class="text-muted text-warning">
+                            <td class="text-warning">
                                 <i class="bi bi-exclamation-triangle me-1"></i>Denda Keterlambatan:
                             </td>
-                            <td class="text-end fw-bold text-warning">Rp {{ number_format($borrowing->late_fee, 0, ',', '.') }}</td>
+                            <td class="text-end fw-bold text-warning">
+                                Rp {{ number_format($borrowing->late_fee, 0, ',', '.') }}
+                            </td>
                         </tr>
                         @endif
-                        <tr class="border-top">
-                            <td class="text-muted fw-bold">Total Bayar:</td>
-                            <td class="text-end fw-bold text-primary" style="font-size: 1.25rem;">
+                        <tr class="border-top pt-2">
+                            <td class="text-muted fw-bold fs-5">Total Bayar:</td>
+                            <td class="text-end fw-bold text-primary fs-3">
                                 Rp {{ number_format($borrowing->grand_total ?? 0, 0, ',', '.') }}
                             </td>
                         </tr>
@@ -261,7 +273,7 @@
                 <h5 class="mb-1">{{ $borrowing->item->name ?? '-' }}</h5>
                 <p class="text-muted mb-2">{{ $borrowing->item->code ?? '-' }}</p>
                 
-                <div class="d-flex gap-2 mb-3">
+                <div class="d-flex gap-2 mb-3 flex-wrap">
                     <span class="badge bg-info">{{ $borrowing->item->category->name ?? '-' }}</span>
                     @php
                         $conditionBadge = [
@@ -300,7 +312,9 @@
             <i class="bi bi-check-circle me-2"></i>
             <strong>Alat sudah dikembalikan</strong> Terima kasih telah mengembalikan tepat waktu.
             @if($borrowing->late_fee > 0)
-            <br><small class="text-warning">⚠️ Terdapat denda keterlambatan: Rp {{ number_format($borrowing->late_fee, 0, ',', '.') }}</small>
+            <br><small class="text-warning fw-bold mt-2 d-block">
+                ⚠️ Terdapat denda keterlambatan: Rp {{ number_format($borrowing->late_fee, 0, ',', '.') }}
+            </small>
             @endif
         </div>
         @endif
@@ -352,7 +366,9 @@
                             <h6 class="mb-0">Dikembalikan</h6>
                             <small class="text-muted">{{ \Carbon\Carbon::parse($borrowing->actual_return_date)->format('d M Y') }}</small>
                             @if($borrowing->late_fee > 0)
-                            <br><small class="text-warning">⚠️ Denda: Rp {{ number_format($borrowing->late_fee, 0, ',', '.') }}</small>
+                            <br><small class="text-warning fw-bold">
+                                ⚠️ Denda: Rp {{ number_format($borrowing->late_fee, 0, ',', '.') }}
+                            </small>
                             @endif
                         </div>
                     </div>
