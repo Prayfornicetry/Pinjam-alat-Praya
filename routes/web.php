@@ -11,17 +11,7 @@ use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\DiscountController; 
-
-// ==========================================
-//    ROOT ROUTE (Langsung ke Login/Dashboard)
-// ==========================================
-Route::get('/', function () {
-    if (Auth::check()) {
-        return redirect()->route('dashboard');
-    }
-    return redirect()->route('login');
-});
+use App\Http\Controllers\DiscountController; // ✅ TAMBAH INI
 
 // ==========================================
 // GUEST ROUTES (Belum Login)
@@ -32,6 +22,8 @@ Route::middleware('guest')->group(function () {
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
     Route::post('/register', [AuthController::class, 'register']);
 });
+
+
 
 // ==========================================
 // AUTHENTICATED ROUTES (Sudah Login)
@@ -67,7 +59,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/borrowings-history', [BorrowingController::class, 'history'])->name('borrowings.history');
     
     // ------------------------------------------
-    // USER READ-ONLY ITEMS
+    // USER READ-ONLY ITEMS (DEFINISIKAN SEBELUM ADMIN/STAFF!)
     // ------------------------------------------
     Route::middleware('role:user')->group(function () {
         Route::get('/catalog/items', [ItemController::class, 'userIndex'])->name('items.user.index');
@@ -98,11 +90,11 @@ Route::middleware('auth')->group(function () {
         // Users CRUD
         Route::resource('users', UserController::class);
         
-        // Discount Management (Admin Only)
+        // ✅ Discount Management (Admin Only)
         Route::resource('discounts', DiscountController::class);
         Route::post('/discounts/validate-code', [DiscountController::class, 'validateCode'])->name('discounts.validate-code');
         
-        // Payment verification
+        // Payment verification (Admin Only)
         Route::post('/borrowings/{id}/verify-payment', [BorrowingController::class, 'verifyPayment'])->name('borrowings.verify-payment');
         
         // Settings
@@ -119,4 +111,14 @@ Route::middleware('auth')->group(function () {
         Route::get('reports/excel', [ReportsController::class, 'exportExcel'])->name('reports.excel');
         Route::get('reports/inventory', [ReportsController::class, 'inventoryReport'])->name('reports.inventory');
     });
+
+// Chat Routes (Customer Service)
+Route::middleware('auth')->group(function () {
+    Route::get('/chat/messages', [App\Http\Controllers\ChatController::class, 'getMessages'])->name('chat.messages');
+    Route::post('/chat', [App\Http\Controllers\ChatController::class, 'store'])->name('chat.store');
+    Route::get('/chat/unread', [App\Http\Controllers\ChatController::class, 'getUnreadCount'])->name('chat.unread');
+    Route::get('/chat/users', [App\Http\Controllers\ChatController::class, 'getUserList'])->name('chat.users');
+    Route::post('/chat/mark-read', [App\Http\Controllers\ChatController::class, 'markAsRead'])->name('chat.mark-read');
+    Route::post('/chat/mark-all-read', [App\Http\Controllers\ChatController::class, 'markAllAsRead'])->name('chat.mark-all-read');
+});
 });

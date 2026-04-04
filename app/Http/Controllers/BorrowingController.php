@@ -542,4 +542,21 @@ class BorrowingController extends Controller
         $lateDays = $returnDate->diffInDays($actualReturn);
         return $item->late_fee * $lateDays;
     }
+
+    /**
+ * Chat about specific item
+ */
+public function chatAboutItem(Request $request, $itemId)
+{
+    $item = Item::findOrFail($itemId);
+    
+    Chat::create([
+        'user_id' => Auth::id(),
+        'message' => "Halo admin, saya ingin bertanya tentang ketersediaan barang: {$item->name} ({$item->code}). Apakah masih tersedia?",
+        'sender' => 'user',
+        'is_read' => false,
+    ]);
+    
+    return back()->with('success', 'Pertanyaan tentang barang telah dikirim ke admin!');
+}
 }

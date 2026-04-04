@@ -61,4 +61,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(Borrowing::class, 'approved_by');
     }
+
+    public function chats()
+{
+    return $this->hasMany(Chat::class);
+}
+
+public function adminChats()
+{
+    return $this->hasMany(Chat::class, 'admin_id');
+}
 }
