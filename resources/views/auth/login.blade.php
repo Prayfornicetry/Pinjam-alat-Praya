@@ -5,7 +5,7 @@
 @section('branding')
 <div class="text-center">
     <i class="bi bi-box-seam-fill brand-logo"></i>
-    <h2 class="mb-3">E-Lending System</h2>
+    <h2 class="mb-3">Pinjam Alat Online</h2>
     <p class="mb-4">Sistem Peminjaman Alat Terpadu</p>
     <div class="mt-5">
         <div class="d-flex justify-content-center gap-3">

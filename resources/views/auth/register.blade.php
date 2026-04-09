@@ -6,7 +6,7 @@
 <div class="text-center">
     <i class="bi bi-person-plus-fill brand-logo"></i>
     <h2 class="mb-3">Buat Akun Baru</h2>
-    <p class="mb-4">Bergabung dengan E-Lending System</p>
+    <p class="mb-4">Bergabung dengan Pinjam Alat Online</p>
     <div class="mt-5">
         <img src="https://illustrations.popsy.co/amber/success.svg" alt="Register" class="img-fluid" style="max-height: 200px;">
     </div>
