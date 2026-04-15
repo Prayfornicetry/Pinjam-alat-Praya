@@ -254,18 +254,19 @@
                                     <i class="bi bi-eye"></i>
                                 </a>
                                 
-                                <!-- ✅ Tombol Kembalikan (Hanya jika approved & sudah waktunya) -->
+                                <!-- ✅ Tombol Kembalikan (Hanya jika approved & sudah waktunya) 
                                 @if($borrowing->status === 'approved' && ($isOverdue || $isDueToday || $isUpcoming))
                                 <form action="{{ route('borrowings.return', $borrowing->id) }}" method="POST" class="d-inline">
                                     @csrf
                                     <button type="submit" 
-                                            class="btn btn-sm btn-success" 
-                                            title="Kembalikan"
-                                            onclick="return confirm('Konfirmasi pengembalian alat? Pastikan alat dalam kondisi baik.')">
-                                        <i class="bi bi-arrow-return-left"></i>
-                                    </button>
-                                </form>
-                                @endif
+                                    class="btn btn-sm btn-success" 
+                                    title="Kembalikan"
+                                    onclick="return confirm('Konfirmasi pengembalian alat? Pastikan alat dalam kondisi baik.')">
+                                    <i class="bi bi-arrow-return-left"></i>
+                                </button>
+                            </form>
+                            @endif
+                            -->
                                 
                                 <!-- ✅ Tombol Cancel (Hanya jika pending) -->
                                 @if($borrowing->status === 'pending')
